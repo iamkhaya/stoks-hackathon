@@ -32,6 +32,6 @@
     "helmet": "^8.0.0",
     "morgan": "^1.10.0",
     "pino": "^6.14.0",
-    "tigerbeetle-node": "^0.16.9"
+    "tigerbeetle-node": "^0.16.4"
   }
 }
