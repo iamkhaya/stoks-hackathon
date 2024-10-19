@@ -29,7 +29,8 @@ class PaymentsController {
 
   // Main method to make a payment
   public async makePayment(req: Request, res: Response): Promise<void> {
-    const { finalizedOutgoingPaymentGrantAccessTokenValue, quoteID } = req.body;
+    const { quoteID, outgoingPaymentGrantContinueUri, continueAccessToken } =
+      req.body;
     const sendingWalletAddress: WalletAddress =
       await this.client.walletAddress.get({
         url: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $)
@@ -37,12 +38,17 @@ class PaymentsController {
 
     try {
       await this.initClient();
+      // Step 7: Get the finalized grant for the outgoing payment
+      const finalizedOutgoingPaymentGrant = await this.client.grant.continue({
+        url: outgoingPaymentGrantContinueUri,
+        accessToken: continueAccessToken,
+      });
 
       // Step 8: Create the outgoing payment
       const outgoingPayment = await this.client.outgoingPayment.create(
         {
           url: sendingWalletAddress.resourceServer,
-          accessToken: finalizedOutgoingPaymentGrantAccessTokenValue,
+          accessToken: finalizedOutgoingPaymentGrant.access_token.value,
         },
         {
           walletAddress: sendingWalletAddress.id,
