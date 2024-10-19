@@ -135,3 +135,5 @@ build
 tigerbeetle
 tigerbeetle.zip
 data/*
+server/.DS_Store
+server/private.key
