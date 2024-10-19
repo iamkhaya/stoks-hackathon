@@ -19,46 +19,32 @@ class PaymentsFlowController {
     try {
       // 1. Create an Incoming Payment Grant
       const grantResponse = await this.OpenPaymentsGrantController.createGrant('incoming-payment');
-      const incomingPaymentAccessToken = grantResponse.grant.access_token.value;
+      const incomingPaymentAccessToken = grantResponse.access_token.value;
+      console.log('Incoming access token:', incomingPaymentAccessToken);
 
       // 2. Create an Incoming Payment using the Incoming Payment Grant
-      const incomingPaymentBody = {
-        walletAddress: req.body.payeeWalletAddress,
-        incomingAmount: {
-          value: req.body.amountValue,
-          assetCode: req.body.assetCode || 'USD',
-          assetScale: req.body.assetScale || 2
-        },
-        accessToken: incomingPaymentAccessToken
-      };
-      const incomingPayment = await this.paymentsController.createIncomingPayment(process.env.WALLET_ADDRESS||'', '100','USD', grantResponse.grant.access_token.value);
+     
+      const incomingPayment = await this.paymentsController.createIncomingPayment(process.env.PAYEE_WALLET_ADDRESS_URL||'', '100',grantResponse.access_token.value,'ZAR', );
+        console.log('Incoming payment:', incomingPayment);
       const incomingPaymentUrl = incomingPayment.incomingPayment.id; // URL of the created incoming payment
 
       // 3. Create a Quote Grant
       const quoteGrantResponse = await this.OpenPaymentsGrantController.createGrant('quote');
-      const quoteAccessToken = quoteGrantResponse.grant.access_token.value;
+        console.log('Quote grant response:', quoteGrantResponse);
+      const quoteAccessToken = quoteGrantResponse.access_token.value;
 
       // 4. Create a Quote
-      const quoteBody = {
-        method: 'ilp',
-        walletAddress: req.body.payerWalletAddress,
-        receiver: incomingPaymentUrl,
-        accessToken: quoteAccessToken
-      };
-      const quote = await this.quoteController.createQuote('ilp',process.env.WALLET_ADDRESS||'',incomingPaymentUrl,quoteAccessToken);
+      const quote = await this.quoteController.createQuote('ilp',process.env.PAYEE_WALLET_ADDRESS_URL||'',incomingPaymentUrl,quoteAccessToken);
       const quoteId = quote.quote.id;
 
       // 5. Create an Outgoing Payment Grant
       const outgoingGrantResponse = await this.OpenPaymentsGrantController.createGrant('outgoing-payment');
-      const outgoingPaymentAccessToken = outgoingGrantResponse.grant.access_token.value;
+      console.log('Outgoing grant response:', outgoingGrantResponse);
+      const outgoingPaymentAccessToken = outgoingGrantResponse.access_token.value;
 
       // 6. Create the Outgoing Payment
-      const outgoingPaymentBody = {
-        walletAddress: req.body.payerWalletAddress,
-        quoteId: quoteId,
-        accessToken: outgoingPaymentAccessToken
-      };
-      const outgoingPayment = await this.paymentsController.createOutgoingPayment(process.env.WALLET_ADDRESS||'',quoteId,outgoingPaymentAccessToken);
+      const outgoingPayment = await this.paymentsController.createOutgoingPayment(process.env.PAYEE_WALLET_ADDRESS_URL||'',quoteId,outgoingPaymentAccessToken);
+      console.log('Outgoing payment:', outgoingPayment);
 
       // Send the response back indicating the payment was successful
       res.status(200).json({

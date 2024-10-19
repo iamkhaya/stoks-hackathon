@@ -64,7 +64,7 @@ class OpenPaymentsService {
   // Create an incoming payment
   public async createIncomingPayment(params: IncomingPaymentParams, accessToken: string): Promise<any> {
     if (!this.client) throw new Error("Client not initialized.");
-
+    console.log('line 70, walletAddress: ', params.walletAddress, 'incomingAmount: ', params.incomingAmount, 'accessToken: ', accessToken);
     const incomingPayment = await this.client.incomingPayment.create(
       {
         url: new URL(this.walletAddressUrl).origin,

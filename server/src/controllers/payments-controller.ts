@@ -24,16 +24,16 @@ class PaymentsController {
     try {
       // Initialize the client
       await this.openPaymentsService.init();
+      console.log(`walletAddress: ${walletAddress}, incomingAmount: ${incomingAmount}, accessToken: ${accessToken}, currency: ${currency}`);
 
       // Create an incoming payment
       const incomingPayment = await this.openPaymentsService.createIncomingPayment(
         { walletAddress, incomingAmount: incomingAmountBody },
         accessToken
       );
-
       console.log('Incoming payment successfully created:', incomingPayment);
     } catch (error) {
-     console.error('Error creating incoming payment:', error);
+     console.error('Error creating incoming payment:', JSON.stringify(error));
     }
   }
 
