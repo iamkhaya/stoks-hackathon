@@ -4,7 +4,6 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "dotenv";
 import routes from "./routes"; // Importing your routes
-import errorMiddleware from "./middlewares/error-middleware"; // Importing your custom error handler
 
 config(); // Load environment variables from .env
 
@@ -21,7 +20,6 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bo
 app.use("/api", routes);
 
 // Error handling middleware
-app.use(errorMiddleware);
 
 // Export the configured app
 export { app };

@@ -1,10 +1,11 @@
 import express from 'express';
-import OpenPaymentsGrantController from '../controllers/grant-controller'; // Assuming this is the correct path
-import PaymentsFlowController from '../action/make-payment'; // Assuming this is the correct path
+import PaymentsController from '../controllers/payments-controller';
 
 const router = express.Router();
-const paymentFlowController = new PaymentsFlowController();  // Create an instance of the controller
-// Route to handle the grant creation
-router.post('/make-payment', (req, res) => paymentFlowController.makePayment(req, res));
+const paymentsController = new PaymentsController();
+
+// Route to handle making a full payment
+router.post('/complete-payment', (req, res) => paymentsController.makePayment(req, res));
+router.post('/initiate-payment', (req, res) => paymentsController.initiatePayment(req, res));
 
 export default router;

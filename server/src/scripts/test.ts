@@ -23,17 +23,17 @@ import readline from "readline/promises";
 
 (async () => {
   const client = await createAuthenticatedClient({
-    walletAddressUrl: "https://ilp.interledger-test.dev/khaya-stokvel", // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
+    walletAddressUrl: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
     privateKey:
-      "/Users/khayelihletshuma/workspace/stoks-hackathon/server/private.key",
-    keyId: "19b31445-80ca-4ec4-808a-f7edec8ca3a4",
+      "/Users/dionnechasi/stoks-hackathon/server/private.key",
+    keyId: "fac82984-86ba-45ef-b933-f9498194c5ed"
   });
 
   const sendingWalletAddress: WalletAddress = await client.walletAddress.get({
-    url: "https://ilp.interledger-test.dev/khaya-stokvel", // Make sure the wallet address starts with https:// (not $)
+    url: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $)
   });
   const receivingWalletAddress: WalletAddress = await client.walletAddress.get({
-    url: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $)
+    url: "https://ilp.interledger-test.dev/khaya-stokvel", // Make sure the wallet address starts with https:// (not $)
   });
 
   console.log(
