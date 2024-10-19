@@ -8,13 +8,11 @@ class OpenPaymentsGrantController {
     const walletAddressUrl = process.env.WALLET_ADDRESS_URL ?? '';
     const privateKey = process.env.PRIVATE_KEY ?? '';
     const keyId = process.env.KEY_ID ?? '';
-    console.log(`walletAddressUrl: ${walletAddressUrl}, privateKey: ${privateKey}, keyId: ${keyId}`);
     this.openPaymentsService = new OpenPaymentsService(walletAddressUrl, privateKey, keyId);
   }
 
   // Method to create any type of grant based on the `grantType` in the request body
-  public async createGrant(req: Request, res: Response): Promise<void> {
-    const { grantType, authServerUrl, actions, limits, nonce } = req.body;
+  public async createGrant(grantType:string ,limits?:number, nonce?:any): Promise<any> {
 
     try {
       // Get wallet address (assuming the service method exists for this)
@@ -45,16 +43,10 @@ class OpenPaymentsGrantController {
       }
 
       // Respond with the created grant
-      res.status(200).json({
-        message: 'Grant successfully created',
-        grant,
-      });
+      console.log('Grant successfully created:', JSON.stringify(grant));
+      return grant;
     } catch (error) {
       console.error('Error creating grant:', error);
-      res.status(400).json({
-        message: 'Error creating grant',
-        error,
-      });
     }
   }
 }
