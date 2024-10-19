@@ -12,12 +12,12 @@ EOF
 }
 
 # Run each TigerBeetle instance in a new terminal window
-run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003,127.0.0.1:3004,127.0.0.1:3005 --development 0_0.tigerbeetle"
-run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003,127.0.0.1:3004,127.0.0.1:3005 --development 0_1.tigerbeetle"
-run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003,127.0.0.1:3004,127.0.0.1:3005 --development 0_2.tigerbeetle"
-run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003,127.0.0.1:3004,127.0.0.1:3005 --development 0_3.tigerbeetle"
-run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003,127.0.0.1:3004,127.0.0.1:3005 --development 0_4.tigerbeetle"
-run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003,127.0.0.1:3004,127.0.0.1:3005 --development 0_5.tigerbeetle"
+run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:4000,127.0.0.1:4001,127.0.0.1:4002,127.0.0.1:4003,127.0.0.1:4004,127.0.0.1:4005 --development 0_0.tigerbeetle"
+run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:4000,127.0.0.1:4001,127.0.0.1:4002,127.0.0.1:4003,127.0.0.1:4004,127.0.0.1:4005 --development 0_1.tigerbeetle"
+run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:4000,127.0.0.1:4001,127.0.0.1:4002,127.0.0.1:4003,127.0.0.1:4004,127.0.0.1:4005 --development 0_2.tigerbeetle"
+run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:4000,127.0.0.1:4001,127.0.0.1:4002,127.0.0.1:4003,127.0.0.1:4004,127.0.0.1:4005 --development 0_3.tigerbeetle"
+run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:4000,127.0.0.1:4001,127.0.0.1:4002,127.0.0.1:4003,127.0.0.1:4004,127.0.0.1:4005 --development 0_4.tigerbeetle"
+run_in_new_terminal "cd ./data/ && ./tigerbeetle start --addresses=127.0.0.1:4000,127.0.0.1:4001,127.0.0.1:4002,127.0.0.1:4003,127.0.0.1:4004,127.0.0.1:4005 --development 0_5.tigerbeetle"
 
 # Run docker-compose in another terminal window
-run_in_new_terminal "docker-compose up --build"
+# run_in_new_terminal "docker-compose up --build"

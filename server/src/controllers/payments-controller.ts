@@ -6,11 +6,26 @@ import {
   WalletAddress,
 } from "@interledger/open-payments";
 import readline from "readline/promises";
+import { createClient, id, AccountFlags, TransferFlags } from "tigerbeetle-node";
+
 
 const PAYER_WALLET_ADDRESS = process.env.PAYER_WALLET_ADDRESS || "";
 const PAYER_KEY_ID = process.env.KEY_ID || "";
 const PAYER_PRIVATE_KEY_PATH = process.env.PRIVATE_KEY_PATH || "";
 const PAYEE_WALLET_ADDRESS = process.env.PAYEE_WALLET_ADDRESS || "";
+
+const tigerbeetleClient = createClient({
+  cluster_id: 0n,
+  replica_addresses: [
+    "127.0.0.1:4000",
+    "127.0.0.1:4001",
+    "127.0.0.1:4002",
+    "127.0.0.1:4003",
+    "127.0.0.1:4004",
+    "127.0.0.1:4005",
+  ],
+});
+
 class PaymentsController {
   private client: any;
 
@@ -25,6 +40,60 @@ class PaymentsController {
       privateKey: "/Users/dionnechasi/stoks-hackathon/server/private.key",
       keyId: "fac82984-86ba-45ef-b933-f9498194c5ed",
     });
+  }
+
+  // Track the payment in TigerBeetle (create or update accounts and transfer)
+  private async trackInTigerBeetle(payerId: bigint, amount: string): Promise<void> {
+    const velFundAccountId = 1n; // seeded VelFund account ID in TigerBeetle
+    const payerAccountId = payerId;
+
+    // Check if the payer account exists or create it
+    const payerAccount = {
+      id: payerAccountId,
+      debits_pending: 0n,
+      debits_posted: 0n,
+      credits_pending: 0n,
+      credits_posted: 0n,
+      user_data_128: payerAccountId,
+      user_data_64: BigInt(Date.now()), // realworld timestamp of the transaction
+      user_data_32: 0, //locale
+      reserved: 0,
+      ledger: 1, // Same ledger as VelFund
+      code: 1000, // used for contributions
+      flags: AccountFlags.history,
+      timestamp: 0n,
+    };
+
+    const accountErrors = await tigerbeetleClient.createAccounts([payerAccount]);
+    if (accountErrors.length === 0) {
+      console.log(`TigerBeetle: Payer account ${payerId} created or exists.`);
+    } else {
+      console.error("TigerBeetle: Error creating payer account:", accountErrors);
+    }
+
+    // Create a transfer from the payer to VelFund
+    const transfer = {
+      id: id(), // Unique transfer ID
+      debit_account_id: payerAccountId, // Debit payer's account
+      credit_account_id: velFundAccountId, // Credit VelFund account
+      amount: BigInt(amount),
+      pending_id: 0n,
+      user_data_128: payerAccountId, // Track payer ID
+      user_data_64: BigInt(Date.now()), // Timestamp for tracking
+      user_data_32: 0,
+      timeout: 0,
+      ledger: 1, // Same ledger
+      code: 720, // Custom code for transfers
+      flags: TransferFlags.linked,
+      timestamp: BigInt(Date.now()),
+    };
+
+    const transferErrors = await tigerbeetleClient.createTransfers([transfer]);
+    if (transferErrors.length === 0) {
+      console.log(`TigerBeetle: Transfer of ${amount} from ${payerId} to VelFund successful.`);
+    } else {
+      console.error("TigerBeetle: Error creating transfer:", transferErrors);
+    }
   }
 
   // Main method to make a payment
@@ -57,6 +126,11 @@ class PaymentsController {
       );
       console.log("\nStep 7: Created outgoing payment", outgoingPayment);
 
+      // Step 9: Track the payment in TigerBeetle
+      let payerId: bigint;
+      payerId = 2n; // replace this with the account id from the member (setup on create)?
+      await this.trackInTigerBeetle(BigInt(payerId), outgoingPayment.amount.value);
+      
       // Return the final result of the payment flow
       res.status(200).json({
         message: "Payment successfully made.",
