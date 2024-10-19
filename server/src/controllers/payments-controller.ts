@@ -100,6 +100,7 @@ class PaymentsController {
   public async makePayment(req: Request, res: Response): Promise<void> {
     const { quoteID, outgoingPaymentGrantContinueUri, continueAccessToken } =
       req.body;
+      console.log(`quoteID: ${quoteID}, outgoingPaymentGrantContinueUri: ${outgoingPaymentGrantContinueUri}, continueAccessToken: ${continueAccessToken}`);
     const sendingWalletAddress: WalletAddress =
       await this.client.walletAddress.get({
         url: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $)
@@ -126,10 +127,10 @@ class PaymentsController {
       );
       console.log("\nStep 7: Created outgoing payment", outgoingPayment);
 
-      // Step 9: Track the payment in TigerBeetle
-      let payerId: bigint;
-      payerId = 2n; // replace this with the account id from the member (setup on create)?
-      await this.trackInTigerBeetle(BigInt(payerId), outgoingPayment.amount.value);
+      // // Step 9: Track the payment in TigerBeetle
+      // let payerId: bigint;
+      // payerId = 2n; // replace this with the account id from the member (setup on create)?
+      // await this.trackInTigerBeetle(BigInt(payerId), outgoingPayment.amount.value);
       
       // Return the final result of the payment flow
       res.status(200).json({

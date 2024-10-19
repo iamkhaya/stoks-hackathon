@@ -172,9 +172,9 @@ const StokvelViewPage = () => {
 
       const apiUrl = "http://localhost:3000/api/complete-payment";
       const postData = {
-        finalizedOutgoingPaymentGrantAccessTokenValue,
-        finalizedOutgoingPaymentGrantContinueUri,
-        quoteId,
+        continueAccessToken: finalizedOutgoingPaymentGrantAccessTokenValue,
+        outgoingPaymentGrantContinueUri:finalizedOutgoingPaymentGrantContinueUri,
+        quoteID: quoteId,
       };
 
       const response = await fetch(apiUrl, {
