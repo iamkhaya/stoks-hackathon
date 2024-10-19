@@ -23,9 +23,10 @@ import readline from "readline/promises";
 
 (async () => {
   const client = await createAuthenticatedClient({
-    walletAddressUrl: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
-    privateKey: "/Users/dionnechasi/stoks-hackathon/server/private.key",
-    keyId: "fac82984-86ba-45ef-b933-f9498194c5ed",
+    walletAddressUrl: "https://ilp.interledger-test.dev/khaya-stokvel", // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
+    privateKey:
+      "/Users/khayelihletshuma/workspace/stoks-hackathon/server/private.key",
+    keyId: "19b31445-80ca-4ec4-808a-f7edec8ca3a4",
   });
 
   const sendingWalletAddress: WalletAddress = await client.walletAddress.get({
@@ -37,7 +38,7 @@ import readline from "readline/promises";
 
   console.log(
     "Got wallet addresses. We will set up a payment between the sending and the receiving wallet address",
-    { receivingWalletAddress, sendingWalletAddress },
+    { receivingWalletAddress, sendingWalletAddress }
   );
 
   // Step 1: Get a grant for the incoming payment, so we can create the incoming payment on the receiving wallet address
@@ -54,12 +55,12 @@ import readline from "readline/promises";
           },
         ],
       },
-    },
+    }
   );
 
   console.log(
     "\nStep 1: got incoming payment grant for receiving wallet address",
-    incomingPaymentGrant,
+    incomingPaymentGrant
   );
 
   // Step 2: Create the incoming payment. This will be where funds will be received.
@@ -75,12 +76,13 @@ import readline from "readline/promises";
         assetScale: receivingWalletAddress.assetScale,
         value: "1000",
       },
-    },
+      expiresAt: new Date(Date.now() + 60_000 * 10).toISOString(), // Optional expiry
+    }
   );
 
   console.log(
     "\nStep 2: created incoming payment on receiving wallet address",
-    incomingPayment,
+    incomingPayment
   );
 
   // Step 3: Get a quote grant, so we can create a quote on the sending wallet address
@@ -97,12 +99,12 @@ import readline from "readline/promises";
           },
         ],
       },
-    },
+    }
   );
 
   console.log(
     "\nStep 3: got quote grant on sending wallet address",
-    quoteGrant,
+    quoteGrant
   );
 
   // Step 4: Create a quote, this gives an indication of how much it will cost to pay into the incoming payment
@@ -115,7 +117,7 @@ import readline from "readline/promises";
       walletAddress: sendingWalletAddress.id,
       receiver: incomingPayment.id,
       method: "ilp",
-    },
+    }
   );
 
   console.log("\nStep 4: got quote on sending wallet address", quote);
@@ -151,15 +153,15 @@ import readline from "readline/promises";
         //   nonce: crypto.randomUUID(),
         // },
       },
-    },
+    }
   );
 
   console.log(
     "\nStep 5: got pending outgoing payment grant",
-    outgoingPaymentGrant,
+    outgoingPaymentGrant
   );
   console.log(
-    "Please navigate to the following URL, to accept the interaction from the sending wallet:",
+    "Please navigate to the following URL, to accept the interaction from the sending wallet:"
   );
   console.log(outgoingPaymentGrant.interact.redirect);
 
@@ -188,14 +190,14 @@ import readline from "readline/promises";
 
   if (!isFinalizedGrant(finalizedOutgoingPaymentGrant)) {
     console.log(
-      "There was an error continuing the grant. You probably have not accepted the grant at the url.",
+      "There was an error continuing the grant. You probably have not accepted the grant at the url."
     );
     process.exit();
   }
 
   console.log(
     "\nStep 6: got finalized outgoing payment grant",
-    finalizedOutgoingPaymentGrant,
+    finalizedOutgoingPaymentGrant
   );
 
   // Step 7: Finally, create the outgoing payment on the sending wallet address.
@@ -208,12 +210,12 @@ import readline from "readline/promises";
     {
       walletAddress: sendingWalletAddress.id,
       quoteId: quote.id,
-    },
+    }
   );
 
   console.log(
     "\nStep 7: Created outgoing payment. Funds will now move from the outgoing payment to the incoming payment.",
-    outgoingPayment,
+    outgoingPayment
   );
 
   process.exit();

@@ -47,7 +47,7 @@ class PaymentsController {
         {
           walletAddress: sendingWalletAddress.id,
           quoteId: quoteID,
-        },
+        }
       );
       console.log("\nStep 7: Created outgoing payment", outgoingPayment);
 
@@ -97,7 +97,7 @@ class PaymentsController {
               },
             ],
           },
-        },
+        }
       );
       console.log("\nStep 1: got incoming payment grant", incomingPaymentGrant);
 
@@ -114,7 +114,7 @@ class PaymentsController {
             assetScale: receivingWalletAddress.assetScale,
             value: "1000",
           },
-        },
+        }
       );
       console.log("\nStep 2: created incoming payment", incomingPayment);
 
@@ -132,7 +132,7 @@ class PaymentsController {
               },
             ],
           },
-        },
+        }
       );
       console.log("\nStep 3: got quote grant", quoteGrant);
 
@@ -146,7 +146,7 @@ class PaymentsController {
           walletAddress: sendingWalletAddress.id,
           receiver: incomingPayment.id,
           method: "ilp",
-        },
+        }
       );
       console.log("\nStep 4: got quote", quote);
 
@@ -175,11 +175,11 @@ class PaymentsController {
           interact: {
             start: ["redirect"],
           },
-        },
+        }
       );
       console.log(
         "\nStep 5: got pending outgoing payment grant",
-        outgoingPaymentGrant,
+        outgoingPaymentGrant
       );
       res.status(200).json({
         message: "Payment successfully made.",
