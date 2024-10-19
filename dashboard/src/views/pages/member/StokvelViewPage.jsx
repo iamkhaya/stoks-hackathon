@@ -111,7 +111,7 @@ const StokvelViewPage = () => {
       // Extract walletId and quoteId from the response and store them in localStorage
 
       const finalizedOutgoingPaymentGrantAccessTokenValue =
-        data.outgoingPaymentGrant.continue.access_token;
+        data.outgoingPaymentGrant.continue.access_token.value;
       const quoteId = data.quote.id;
       const finalizedOutgoingPaymentGrantContinueUri =
         data.outgoingPaymentGrant.continue.uri;
@@ -127,14 +127,14 @@ const StokvelViewPage = () => {
       }
 
       localStorage.setItem(
-        finalizedOutgoingPaymentGrantAccessTokenValue,
+        "finalizedOutgoingPaymentGrantAccessTokenValue",
         finalizedOutgoingPaymentGrantAccessTokenValue
       );
       localStorage.setItem(
         "finalizedOutgoingPaymentGrantContinueUri",
         finalizedOutgoingPaymentGrantContinueUri
       );
-      localStorage.setItem(quoteID, quoteID);
+      localStorage.setItem("quoteId", quoteId);
 
       // Assuming the response contains a redirect URL field
       const redirectUrl = data.redirect;
@@ -158,13 +158,22 @@ const StokvelViewPage = () => {
         localStorage.getItem("finalizedOutgoingPaymentGrantAccessTokenValue");
       const quoteId = localStorage.getItem("quoteId");
 
-      if (!walletId || !quoteId) {
-        throw new Error("Error: Missing walletId or quoteId in localStorage.");
+      const finalizedOutgoingPaymentGrantContinueUri = localStorage.getItem(
+        "finalizedOutgoingPaymentGrantContinueUri"
+      );
+
+      if (
+        !finalizedOutgoingPaymentGrantContinueUri ||
+        !quoteId ||
+        !finalizedOutgoingPaymentGrantAccessTokenValue
+      ) {
+        throw new Error("Error: Missing vars localStorage.");
       }
 
       const apiUrl = "http://localhost:3000/api/complete-payment";
       const postData = {
         finalizedOutgoingPaymentGrantAccessTokenValue,
+        finalizedOutgoingPaymentGrantContinueUri,
         quoteId,
       };
 
