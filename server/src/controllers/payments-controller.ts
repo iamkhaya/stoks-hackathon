@@ -21,9 +21,9 @@ class PaymentsController {
   // Initialize the Open Payments client
   private async initClient(): Promise<void> {
     this.client = await createAuthenticatedClient({
-      walletAddressUrl: PAYER_WALLET_ADDRESS, // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
-      privateKey: PAYER_PRIVATE_KEY_PATH,
-      keyId: PAYER_KEY_ID,
+      walletAddressUrl: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
+      privateKey: "/Users/dionnechasi/stoks-hackathon/server/private.key",
+      keyId: "fac82984-86ba-45ef-b933-f9498194c5ed",
     });
   }
 
@@ -32,7 +32,7 @@ class PaymentsController {
     const { finalizedOutgoingPaymentGrantAccessTokenValue, quoteID } = req.body;
     const sendingWalletAddress: WalletAddress =
       await this.client.walletAddress.get({
-        url: PAYER_WALLET_ADDRESS,
+        url: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $)
       });
 
     try {
@@ -71,11 +71,11 @@ class PaymentsController {
       // Step 1: Retrieve sending and receiving wallet addresses
       const sendingWalletAddress: WalletAddress =
         await this.client.walletAddress.get({
-          url: PAYER_WALLET_ADDRESS,
+          url: "https://ilp.interledger-test.dev/dionne-velfund",
         });
       const receivingWalletAddress: WalletAddress =
         await this.client.walletAddress.get({
-          url: PAYEE_WALLET_ADDRESS,
+          url: "https://ilp.interledger-test.dev/khaya-stokvel",
         });
 
       console.log("Got wallet addresses", {
