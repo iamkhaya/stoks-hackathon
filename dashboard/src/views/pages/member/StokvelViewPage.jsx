@@ -81,6 +81,53 @@ const StokvelViewPage = () => {
     },
   };
 
+  const handleInitiatePayment = async (e) => {
+    try {
+      e.preventDefault();
+
+      // Uncomment this section once the API is ready
+      /*
+      const apiUrl = "https://api.example.com/initiate-payment";
+      const postData = {
+        walletAddress: stokvel.currentRecipient,
+        amount: 1000,
+        currency: "USD",
+        description: `Payout for ${stokvel.name} Stokvel`,
+      };
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+  
+      // Check if the response is ok (status code 2xx)
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+  
+      // Parse the JSON response
+      const data = await response.json();
+  
+      // Assuming the response contains a redirect URL field
+      const redirectUrl = data.redirectUrl;
+      if (!redirectUrl) {
+        throw new Error("Error: No redirect URL found in the response");
+      }
+      */
+
+      // Hardcoded redirect URL for testing
+      const redirectUrl = "https://ilp.interledger-test.dev/khaya-stokvel";
+
+      // Redirect the user to the payment URL
+      window.location.href = redirectUrl;
+    } catch (error) {
+      console.error("Failed to initiate payment:", error);
+      // Handle error (e.g., show an error message to the user)
+    }
+  };
+
   return (
     <CContainer className="mt-4">
       <h2>{stokvel.name} Stokvel</h2>
@@ -193,7 +240,11 @@ const StokvelViewPage = () => {
                         {stokvel.paymentRoster[index].member}
                       </CTableDataCell>
                       <CTableDataCell>
-                        <CButton color="success" size="sm">
+                        <CButton
+                          color="success"
+                          size="sm"
+                          onClick={handleInitiatePayment}
+                        >
                           Pay Now
                         </CButton>
                       </CTableDataCell>
