@@ -26,6 +26,12 @@ async function seedTigerBeetle() {
     ],
   });
 
+  const velFundAccounts = await client.lookupAccounts([1n])
+  if(velFundAccounts.length > 0){
+    console.log("VelFund account already exists")
+    return true;
+  }
+
   const account = {
     id: 1n, // A unique ID for the stokvel account in TigerBeetle
     debits_pending: 0n,
