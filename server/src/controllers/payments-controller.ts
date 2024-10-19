@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import {
   createAuthenticatedClient,
   OpenPaymentsClientError,
@@ -13,7 +13,6 @@ const PAYER_PRIVATE_KEY_PATH = process.env.PRIVATE_KEY_PATH || "";
 const PAYEE_WALLET_ADDRESS = process.env.PAYEE_WALLET_ADDRESS || "";
 class PaymentsController {
   private client: any;
-  
 
   constructor() {
     this.client = null;
@@ -22,32 +21,39 @@ class PaymentsController {
   // Initialize the Open Payments client
   private async initClient(): Promise<void> {
     this.client = await createAuthenticatedClient({
-    walletAddressUrl: 'https://ilp.interledger-test.dev/dionne-velfund' , // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
-    privateKey:'/Users/dionnechasi/stoks-hackathon/server/private.key',
-    keyId: 'fac82984-86ba-45ef-b933-f9498194c5ed',
+      walletAddressUrl: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $), and has no trailing slashes
+      privateKey: "/Users/dionnechasi/stoks-hackathon/server/private.key",
+      keyId: "fac82984-86ba-45ef-b933-f9498194c5ed",
     });
   }
 
   // Main method to make a payment
   public async makePayment(req: Request, res: Response): Promise<void> {
-    const {finalizedOutgoingPaymentGrantAccessTokenValue,  quoteID} = req.body;
-     const sendingWalletAddress: WalletAddress = await this.client.walletAddress.get({
-        url: 'https://ilp.interledger-test.dev/dionne-velfund', // Make sure the wallet address starts with https:// (not $)
+    const { quoteID, outgoingPaymentGrantContinueUri, continueAccessToken } =
+      req.body;
+    const sendingWalletAddress: WalletAddress =
+      await this.client.walletAddress.get({
+        url: "https://ilp.interledger-test.dev/dionne-velfund", // Make sure the wallet address starts with https:// (not $)
       });
-    
+
     try {
       await this.initClient();
+      // Step 7: Get the finalized grant for the outgoing payment
+      const finalizedOutgoingPaymentGrant = await this.client.grant.continue({
+        url: outgoingPaymentGrantContinueUri,
+        accessToken: continueAccessToken,
+      });
 
       // Step 8: Create the outgoing payment
       const outgoingPayment = await this.client.outgoingPayment.create(
         {
           url: sendingWalletAddress.resourceServer,
-          accessToken: finalizedOutgoingPaymentGrantAccessTokenValue,
+          accessToken: finalizedOutgoingPaymentGrant.access_token.value,
         },
         {
           walletAddress: sendingWalletAddress.id,
           quoteId: quoteID,
-        }
+        },
       );
       console.log("\nStep 7: Created outgoing payment", outgoingPayment);
 
@@ -55,7 +61,6 @@ class PaymentsController {
       res.status(200).json({
         message: "Payment successfully made.",
       });
-
     } catch (error) {
       console.error("Error making payment:", error);
       res.status(500).json({
@@ -66,18 +71,23 @@ class PaymentsController {
   }
 
   public async initiatePayment(req: Request, res: Response): Promise<void> {
-     try {
+    try {
       await this.initClient();
 
       // Step 1: Retrieve sending and receiving wallet addresses
-      const sendingWalletAddress: WalletAddress = await this.client.walletAddress.get({
-        url: 'https://ilp.interledger-test.dev/dionne-velfund',
-      });
-      const receivingWalletAddress: WalletAddress = await this.client.walletAddress.get({
-        url: 'https://ilp.interledger-test.dev/khaya-stokvel',
-      });
+      const sendingWalletAddress: WalletAddress =
+        await this.client.walletAddress.get({
+          url: "https://ilp.interledger-test.dev/dionne-velfund",
+        });
+      const receivingWalletAddress: WalletAddress =
+        await this.client.walletAddress.get({
+          url: "https://ilp.interledger-test.dev/khaya-stokvel",
+        });
 
-      console.log("Got wallet addresses", { receivingWalletAddress, sendingWalletAddress });
+      console.log("Got wallet addresses", {
+        receivingWalletAddress,
+        sendingWalletAddress,
+      });
 
       // Step 2: Get a grant for the incoming payment (receiving wallet)
       const incomingPaymentGrant = await this.client.grant.request(
@@ -93,7 +103,7 @@ class PaymentsController {
               },
             ],
           },
-        }
+        },
       );
       console.log("\nStep 1: got incoming payment grant", incomingPaymentGrant);
 
@@ -110,7 +120,7 @@ class PaymentsController {
             assetScale: receivingWalletAddress.assetScale,
             value: "1000",
           },
-        }
+        },
       );
       console.log("\nStep 2: created incoming payment", incomingPayment);
 
@@ -128,7 +138,7 @@ class PaymentsController {
               },
             ],
           },
-        }
+        },
       );
       console.log("\nStep 3: got quote grant", quoteGrant);
 
@@ -142,7 +152,7 @@ class PaymentsController {
           walletAddress: sendingWalletAddress.id,
           receiver: incomingPayment.id,
           method: "ilp",
-        }
+        },
       );
       console.log("\nStep 4: got quote", quote);
 
@@ -171,10 +181,13 @@ class PaymentsController {
           interact: {
             start: ["redirect"],
           },
-        }
+        },
       );
-      console.log("\nStep 5: got pending outgoing payment grant", outgoingPaymentGrant);
-       res.status(200).json({
+      console.log(
+        "\nStep 5: got pending outgoing payment grant",
+        outgoingPaymentGrant,
+      );
+      res.status(200).json({
         message: "Payment successfully made.",
         redirect: outgoingPaymentGrant.interact.redirect,
         quote,
@@ -183,7 +196,7 @@ class PaymentsController {
       });
     } catch (error) {
       console.error("Error initiating payment:", error);
-      }
+    }
   }
 }
 
