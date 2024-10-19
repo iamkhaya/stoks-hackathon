@@ -1,0 +1,44 @@
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:13
+    container_name: velfund_postgres
+    environment:
+      POSTGRES_USER: your_db_user
+      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: velfund_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Backend server (Node.js)
+  server:
+    build: ./server
+    container_name: velfund_server
+    environment:
+      DATABASE_URL: postgres://your_db_user:your_db_password@postgres:5432/velfund_db
+      TIGERBEETLE_URL: tigerbeetle_0:3001
+    depends_on:
+      - postgres
+      # - tigerbeetle_0
+    volumes:
+      - ./server:/app
+    ports:
+      - "5002:5002"
+
+  # Frontend dashboard (Vite)
+  dashboard:
+    build: ./dashboard
+    container_name: velfund_dashboard
+    depends_on:
+      - server
+    volumes:
+      - ./dashboard:/app
+    ports:
+      - "5001:5001"
+    command: "npm install && npm run build && npm run preview"
+
+volumes:
+  postgres_data:
+  tigerbeetle_data:
