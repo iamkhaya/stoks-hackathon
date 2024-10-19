@@ -109,17 +109,17 @@ const StokvelViewPage = () => {
       const data = await response.json();
 
       // Extract walletId and quoteId from the response and store them in localStorage
-      const {
-        finalizedOutgoingPaymentGrantAccessTokenValue,
 
-        quoteID,
-        redirect,
-      } = data;
+      const finalizedOutgoingPaymentGrantAccessTokenValue =
+        data.outgoingPaymentGrant.continue.access_token;
+      const quoteId = data.quote.id;
+      const finalizedOutgoingPaymentGrantContinueUri =
+        data.outgoingPaymentGrant.continue.uri;
 
       if (
         !finalizedOutgoingPaymentGrantAccessTokenValue ||
-        !quoteId ||
-        !redirect
+        !finalizedOutgoingPaymentGrantContinueUri ||
+        !quoteId
       ) {
         throw new Error(
           "Error: Missing required fields (walletId, quoteId, or redirect) in the response."
@@ -130,7 +130,10 @@ const StokvelViewPage = () => {
         finalizedOutgoingPaymentGrantAccessTokenValue,
         finalizedOutgoingPaymentGrantAccessTokenValue
       );
-
+      localStorage.setItem(
+        "finalizedOutgoingPaymentGrantContinueUri",
+        finalizedOutgoingPaymentGrantContinueUri
+      );
       localStorage.setItem(quoteID, quoteID);
 
       // Assuming the response contains a redirect URL field
