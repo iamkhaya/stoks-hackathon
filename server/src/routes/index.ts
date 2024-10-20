@@ -4,7 +4,7 @@ import PaymentsController from "../controllers/payments-controller";
 const router = express.Router();
 const paymentsController = new PaymentsController();
 
-// Route to handle making a full payment
+
 router.post("/complete-payment", (req, res) =>
   paymentsController.makePayment(req, res),
 );
