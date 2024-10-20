@@ -98,3 +98,28 @@ The following command with start a 6-node cluster on Tigerbeetle and use docker-
 ```
 ./run.sh
 ```
+# Testing the Application
+
+	1.	Navigate to the login page at http://localhost:5001 to access the dashboard.
+	2.	Use dummy credentials to log in and select a stokvel.
+	3.	Click the “Initiate Payment” button to simulate a payment.
+
+# Technical Architecture
+
+## Transaction Flow
+
+	•	User Payment: When a user makes a payment, it is processed through OpenPayments and logged in TigerBeetle for accounting purposes.
+	•	Contributions Ledger: TigerBeetle manages the ledgering for each contribution, ensuring accurate tracking of funds in the stokvel.
+	•	Real-time Updates: The user interface updates in real-time using webhooks and subscription models provided by OpenPayments, giving contributors full visibility into their savings.
+
+# Contributions
+
+We welcome open-source contributions to enhance Velfund! If you’re interested in contributing:
+
+	1.	Fork the repository.
+	2.	Create a new branch for your feature or bug fix.
+	3.	Submit a pull request.
+
+# Code of Conduct
+
+Please adhere to the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) when interacting with the project.
