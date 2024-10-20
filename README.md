@@ -72,7 +72,7 @@ We also attempted to use Tigerbeetle as a ledger for the application. However, d
 
 **Download tigerbeetle**
 ```
-cd data
+mkdir data && cd data
 curl -Lo tigerbeetle.zip https://mac.tigerbeetle.com && unzip tigerbeetle.zip && ./tigerbeetle version
 ```
 
