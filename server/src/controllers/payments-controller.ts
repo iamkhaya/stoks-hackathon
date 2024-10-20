@@ -8,7 +8,8 @@ import {
   GrantRequest,
   OutgoingPayment,
   Grant,
-  GrantContinuation
+  GrantContinuation,
+  Quote,
 } from "@interledger/open-payments";
 import readline from "readline/promises";
 import { createClient, id, AccountFlags, TransferFlags } from "tigerbeetle-node";
@@ -117,6 +118,9 @@ public async makePayment(req: Request, res: Response): Promise<void> {
 
     console.log("Created outgoing payment:", outgoingPayment);
 
+    // Track the payment in TigerBeetle
+    //await this.trackInTigerBeetle(1n, outgoingPayment.debitAmount.value);
+
     // Return success response
     res.status(200).json({
       message: "Payment successfully made.",
@@ -196,156 +200,166 @@ private handleError(res: Response, error: Error, defaultMessage: string): void {
 }
 
 
-  /**
- * Initiates a payment process by retrieving wallet addresses, creating an incoming payment,
- * generating a quote, and preparing an outgoing payment.
- * 
- * This method performs the following steps:
- * 1. Initializes the payment client.
- * 2. Retrieves sending and receiving wallet addresses from the specified Interledger Payment Platform (ILP) URLs.
- * 3. Requests a grant for the incoming payment associated with the receiving wallet address.
- * 4. Creates an incoming payment for the receiving wallet address.
- * 5. Requests a grant for a quote associated with the sending wallet address.
- * 6. Creates a quote for the payment based on the sending wallet's information and the incoming payment details.
- * 7. Requests a grant for an outgoing payment from the sending wallet, preparing the final stage of the payment process.
- * 
- * After successful execution, a JSON response with the quote, incoming payment, and outgoing payment grant details is sent
- * back to the client. If an error occurs, it is logged and a failure response is sent.
- * 
- * @param {Request} req - The HTTP request containing the necessary parameters for the payment process.
- * @param {Response} res - The HTTP response object used to send the outcome of the payment process.
- * @returns {Promise<void>} - No return value, but sends a response to the client containing payment details.
- * 
- * @throws {Error} - If any step of the payment initiation process fails, an error is logged and handled appropriately.
- */
-  public async initiatePayment(req: Request, res: Response): Promise<void> {
-    try {
-      await this.initClient();
+public async initiatePayment(req: Request, res: Response): Promise<void> {
+  try {
+    await this.initClient();
 
-      // Retrieve sending and receiving wallet addresses
-      const sendingWalletAddress: WalletAddress =
-        await this.client.walletAddress.get({
-          url: "https://ilp.interledger-test.dev/dionne-velfund",
-        });
-      const receivingWalletAddress: WalletAddress =
-        await this.client.walletAddress.get({
-          url: "https://ilp.interledger-test.dev/khaya-stokvel",
-        });
+    // Retrieve sending and receiving wallet addresses
+    const sendingWalletAddress = await this.getWalletAddress("https://ilp.interledger-test.dev/dionne-velfund");
+    const receivingWalletAddress = await this.getWalletAddress("https://ilp.interledger-test.dev/khaya-stokvel");
 
-      console.log("Got wallet addresses", {
-        receivingWalletAddress,
-        sendingWalletAddress,
-      });
+    console.log("Got wallet addresses", { receivingWalletAddress, sendingWalletAddress });
 
-      //Get a grant for the incoming payment (receiving wallet)
-      const incomingPaymentGrant = await this.client.grant.request(
-        {
-          url: receivingWalletAddress.authServer,
-        },
-        {
-          access_token: {
-            access: [
-              {
-                type: "incoming-payment",
-                actions: ["read", "complete", "create"],
-              },
-            ],
-          },
-        }
-      );
-      console.log("Successfully created: Incoming payment grant", incomingPaymentGrant);
+    // Get and create the incoming payment
+    const incomingPaymentGrant = await this.getGrant(receivingWalletAddress.authServer, "incoming-payment", ["read", "complete", "create"]);
+    const incomingPayment = await this.createIncomingPayment(receivingWalletAddress, incomingPaymentGrant, "1000");
 
-      //Create the incoming payment
-      const incomingPayment = await this.client.incomingPayment.create(
-        {
-          url: receivingWalletAddress.resourceServer,
-          accessToken: incomingPaymentGrant?.access_token?.value,
-        },
-        {
-          walletAddress: receivingWalletAddress.id,
-          incomingAmount: {
-            assetCode: receivingWalletAddress.assetCode,
-            assetScale: receivingWalletAddress.assetScale,
-            value: "1000",
-          },
-        }
-      );
-      console.log("Sucessfully created incoming payment:", incomingPayment);
+    console.log("Successfully created incoming payment:", incomingPayment);
 
-      // Step 4: Get a quote grant (sending wallet)
-      const quoteGrant = await this.client.grant.request(
-        {
-          url: sendingWalletAddress.authServer,
-        },
-        {
-          access_token: {
-            access: [
-              {
-                type: "quote",
-                actions: ["create", "read"],
-              },
-            ],
-          },
-        }
-      );
-      console.log("Successfully created quote grant:", quoteGrant);
+    // Get and create the quote for the payment
+    const quoteGrant = await this.getGrant(sendingWalletAddress.authServer, "quote", ["create", "read"]);
+    const quote = await this.createQuote(sendingWalletAddress, incomingPayment, quoteGrant);
 
-      // Step 5: Create a quote
-      const quote = await this.client.quote.create(
-        {
-          url: sendingWalletAddress.resourceServer,
-          accessToken: quoteGrant.access_token.value,
-        },
-        {
-          walletAddress: sendingWalletAddress.id,
-          receiver: incomingPayment.id,
-          method: "ilp",
-        }
-      );
-      console.log("Successfully created quote", quote);
+    console.log("Successfully created quote", quote);
 
-      // Get an outgoing payment grant (sending wallet)
-      const outgoingPaymentGrant = await this.client.grant.request(
-        {
-          url: sendingWalletAddress.authServer,
-        },
-        {
-          access_token: {
-            access: [
-              {
-                type: "outgoing-payment",
-                actions: ["read", "create"],
-                limits: {
-                  debitAmount: {
-                    assetCode: quote.debitAmount.assetCode,
-                    assetScale: quote.debitAmount.assetScale,
-                    value: quote.debitAmount.value,
-                  },
-                },
-                identifier: sendingWalletAddress.id,
-              },
-            ],
-          },
-          interact: {
-            start: ["redirect"],
-          },
-        }
-      );
-      console.log(
-        "Successfully created pending outgoing payment grant:",
-        outgoingPaymentGrant
-      );
-      res.status(200).json({
-        message: "Payment successfully made.",
-        redirect: outgoingPaymentGrant.interact.redirect,
-        quote,
-        incomingPayment,
-        outgoingPaymentGrant,
-      });
-    } catch (error) {
-      console.error("Error initiating payment:", error);
-    }
+    // Get the outgoing payment grant
+    const outgoingPaymentGrant = await this.getOutgoingPaymentGrant(sendingWalletAddress, quote);
+
+    console.log("Successfully created pending outgoing payment grant:", outgoingPaymentGrant);
+
+    // Send the success response
+    res.status(200).json({
+      message: "Payment successfully made.",
+      redirect: outgoingPaymentGrant.interact.redirect,
+      quote,
+      incomingPayment,
+      outgoingPaymentGrant,
+    });
+  } catch (error:any) {
+    console.error("Error initiating payment:", error);
+    this.handleError(res, error, "Error initiating payment");
   }
+}
+
+/**
+ * Request a grant for the specified action types.
+ * @param {string} authServer - The authorization server URL.
+ * @param {string} type - The type of the grant (e.g., 'incoming-payment', 'quote').
+ * @param {string[]} actions - The actions allowed in the grant.
+ * @returns {Promise<Grant>} - The grant object.
+ */
+private async getGrant(authServer: string, type: string, actions: string[]): Promise<Grant> {
+  try {
+    return await this.client.grant.request(
+      { url: authServer },
+      {
+        access_token: {
+          access: [
+            {
+              type,
+              actions,
+            },
+          ],
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error(`Failed to request ${type} grant: ${error}`);
+  }
+}
+
+/**
+ * Create an incoming payment for the specified wallet address and grant.
+ * @param {WalletAddress} walletAddress - The wallet address to receive the payment.
+ * @param {Grant} grant - The grant for creating the payment.
+ * @param {string} amountValue - The value of the incoming payment.
+ * @returns {Promise<IncomingPayment>} - The created incoming payment.
+ */
+private async createIncomingPayment(walletAddress: WalletAddress, grant: Grant, amountValue: string): Promise<IncomingPayment> {
+  try {
+    return await this.client.incomingPayment.create(
+      {
+        url: walletAddress.resourceServer,
+        accessToken: grant?.access_token?.value,
+      },
+      {
+        walletAddress: walletAddress.id,
+        incomingAmount: {
+          assetCode: walletAddress.assetCode,
+          assetScale: walletAddress.assetScale,
+          value: amountValue,
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error(`Failed to create incoming payment: ${error}`);
+  }
+}
+
+/**
+ * Create a quote for the payment.
+ * @param {WalletAddress} walletAddress - The sending wallet address.
+ * @param {IncomingPayment} incomingPayment - The incoming payment details.
+ * @param {Grant} grant - The grant for the quote creation.
+ * @returns {Promise<Quote>} - The created quote.
+ */
+private async createQuote(walletAddress: WalletAddress, incomingPayment: IncomingPayment, grant: Grant): Promise<Quote> {
+  try {
+    return await this.client.quote.create(
+      {
+        url: walletAddress.resourceServer,
+        accessToken: grant.access_token.value,
+      },
+      {
+        walletAddress: walletAddress.id,
+        receiver: incomingPayment.id,
+        method: "ilp",
+      }
+    );
+  } catch (error) {
+    throw new Error(`Failed to create quote: ${error}`);
+  }
+}
+
+/**
+ * Get the outgoing payment grant for the sending wallet.
+ * @param {WalletAddress} walletAddress - The sending wallet address.
+ * @param {Quote} quote - The created quote for the payment.
+ * @returns {Promise<Grant>} - The outgoing payment grant.
+ */
+private async getOutgoingPaymentGrant(walletAddress: WalletAddress, quote: Quote): Promise<any> {
+  try {
+    return await this.client.grant.request(
+      {
+        url: walletAddress.authServer,
+      },
+      {
+        access_token: {
+          access: [
+            {
+              type: "outgoing-payment",
+              actions: ["read", "create"],
+              limits: {
+                debitAmount: {
+                  assetCode: quote.debitAmount.assetCode,
+                  assetScale: quote.debitAmount.assetScale,
+                  value: quote.debitAmount.value,
+                },
+              },
+              identifier: walletAddress.id,
+            },
+          ],
+        },
+        interact: {
+          start: ["redirect"],
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error(`Failed to request outgoing payment grant: ${error}`);
+  }
+}
+
 }
 
 export default PaymentsController;
