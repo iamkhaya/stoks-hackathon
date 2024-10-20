@@ -16,6 +16,7 @@ import {
   CTableDataCell,
 } from "@coreui/react";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 // Function to return color based on trust score
 const getTrustScoreColor = (trustScore) => {
@@ -189,6 +190,12 @@ const StokvelViewPage = () => {
       }
 
       const data = await response.json();
+
+      Swal.fire({
+        title: "Thank you for your payment!",
+        text: "Payment completed successfully",
+        icon: "success",
+      });
       console.log("Payment completed successfully:", data);
 
       // Optionally clear the stored variables after payment confirmation
