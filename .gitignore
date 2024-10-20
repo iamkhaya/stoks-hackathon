@@ -128,3 +128,12 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+.DS_Store
+build
+tigerbeetle
+tigerbeetle.zip
+data/*
+server/.DS_Store
+server/private.key
