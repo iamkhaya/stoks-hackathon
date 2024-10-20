@@ -323,9 +323,9 @@ const StokvelViewPage = () => {
                         >
                           Initiate Payment
                         </CButton>
-
+                        {' '}
                         <CButton
-                          color="success"
+                          color="secondary"
                           size="sm"
                           onClick={(e) => handleConfirmPayment(e)}
                         >
