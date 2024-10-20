@@ -6,6 +6,8 @@ Traditional stokvels foster community and financial security, but are often limi
 
 Developed as part of a hackathon, Velfund addresses challenges like cash flow management and community building, extending the traditional stokvel model to a global scale.
 
+Website: https://velfund.framer.website/
+
 ## Problem Being Solved
 In many communities, collective savings groups like stokvels are used to help manage cash flow and build financial support networks. However, these systems often face challenges related to:
 - Currency constraints and differences
