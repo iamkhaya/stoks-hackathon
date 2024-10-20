@@ -7,8 +7,6 @@ import {
   CCol,
   CContainer,
   CRow,
-  CListGroup,
-  CListGroupItem,
   CBadge,
   CTable,
   CTableBody,
@@ -18,6 +16,7 @@ import {
   CTableDataCell,
 } from "@coreui/react";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 // Function to return color based on trust score
 const getTrustScoreColor = (trustScore) => {
@@ -27,7 +26,10 @@ const getTrustScoreColor = (trustScore) => {
 };
 
 const StokvelViewPage = () => {
-  // Dummy data for demonstration
+  const [isInitiateLoading, setIsInitiateLoading] = React.useState(false);
+  const [isConfirmLoading, setIsConfirmLoading] = React.useState(false);
+
+  // Dummy data for demonstration (to replace with API)
 
   const currentUser = {
     id: 1,
@@ -85,6 +87,8 @@ const StokvelViewPage = () => {
     try {
       e.preventDefault();
 
+      setIsInitiateLoading(true);
+
       const apiUrl = "http://localhost:3000/api/initiate-payment";
       const postData = {
         walletAddress: stokvel.currentRecipient,
@@ -108,8 +112,7 @@ const StokvelViewPage = () => {
       // Parse the JSON response
       const data = await response.json();
 
-      // Extract walletId and quoteId from the response and store them in localStorage
-
+      // Extract confirmation details from the response and store them in localStorage
       const finalizedOutgoingPaymentGrantAccessTokenValue =
         data.outgoingPaymentGrant.continue.access_token.value;
       const quoteId = data.quote.id;
@@ -142,16 +145,25 @@ const StokvelViewPage = () => {
         throw new Error("Error: No redirect URL found in the response");
       }
 
+      Swal.fire(
+        "Success",
+        "You will be redirected to accept the payment",
+        "success"
+      );
+
       // Redirect the user to the payment URL
       window.location.href = redirectUrl;
     } catch (error) {
       console.error("Failed to initiate payment:", error);
-      // Handle error (e.g., show an error message to the user)
+      Swal.fire("Error", "Failed to initiate payment!", "error");
+    } finally {
+      setIsInitiateLoading(false);
     }
   };
 
   const handleConfirmPayment = async (e) => {
     e.preventDefault();
+    setIsConfirmLoading(true);
     try {
       // Retrieve the stored walletId and quoteId from localStorage
       const finalizedOutgoingPaymentGrantAccessTokenValue =
@@ -173,7 +185,8 @@ const StokvelViewPage = () => {
       const apiUrl = "http://localhost:3000/api/complete-payment";
       const postData = {
         continueAccessToken: finalizedOutgoingPaymentGrantAccessTokenValue,
-        outgoingPaymentGrantContinueUri:finalizedOutgoingPaymentGrantContinueUri,
+        outgoingPaymentGrantContinueUri:
+          finalizedOutgoingPaymentGrantContinueUri,
         quoteID: quoteId,
       };
 
@@ -193,14 +206,16 @@ const StokvelViewPage = () => {
       const data = await response.json();
       console.log("Payment completed successfully:", data);
 
-      alert("Payment completed successfully!");
+      Swal.fire("Success", "Payment completed successfully!", "success");
 
       // Optionally clear the stored variables after payment confirmation
       localStorage.removeItem("walletId");
       localStorage.removeItem("quoteId");
     } catch (error) {
       console.error("Failed to complete payment:", error);
-      // Handle error (e.g., show an error message to the user)
+      Swal.fire("Error", "Failed to complete payment!", "error");
+    } finally {
+      setIsConfirmLoading(false); // Hide spinner after completion
     }
   };
 
@@ -320,16 +335,25 @@ const StokvelViewPage = () => {
                           color="success"
                           size="sm"
                           onClick={(e) => handleInitiatePayment(e)}
+                          disabled={isInitiateLoading}
                         >
-                          Initiate Payment
-                        </CButton>
-                        {' '}
+                          {isInitiateLoading ? (
+                            <CSpinner size="sm" />
+                          ) : (
+                            "Initiate Payment"
+                          )}
+                        </CButton>{" "}
                         <CButton
                           color="secondary"
                           size="sm"
                           onClick={(e) => handleConfirmPayment(e)}
+                          disabled={isConfirmLoading}
                         >
-                          Confirm Payment
+                          {isConfirmLoading ? (
+                            <CSpinner size="sm" />
+                          ) : (
+                            "Confirm Payment"
+                          )}
                         </CButton>
                       </CTableDataCell>
                     </CTableRow>
