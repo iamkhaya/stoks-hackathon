@@ -85,12 +85,10 @@ const StokvelViewPage = () => {
     try {
       e.preventDefault();
 
-      // Uncomment this section once the API is ready
-      /*
-      const apiUrl = "https://api.example.com/initiate-payment";
+      const apiUrl = "http://localhost:3000/api/initiate-payment";
       const postData = {
         walletAddress: stokvel.currentRecipient,
-        amount: 1000,
+        amount: 10,
         currency: "USD",
         description: `Payout for ${stokvel.name} Stokvel`,
       };
@@ -101,29 +99,107 @@ const StokvelViewPage = () => {
         },
         body: JSON.stringify(postData),
       });
-  
+
       // Check if the response is ok (status code 2xx)
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-  
+
       // Parse the JSON response
       const data = await response.json();
-  
+
+      // Extract walletId and quoteId from the response and store them in localStorage
+
+      const finalizedOutgoingPaymentGrantAccessTokenValue =
+        data.outgoingPaymentGrant.continue.access_token.value;
+      const quoteId = data.quote.id;
+      const finalizedOutgoingPaymentGrantContinueUri =
+        data.outgoingPaymentGrant.continue.uri;
+
+      if (
+        !finalizedOutgoingPaymentGrantAccessTokenValue ||
+        !finalizedOutgoingPaymentGrantContinueUri ||
+        !quoteId
+      ) {
+        throw new Error(
+          "Error: Missing required fields (walletId, quoteId, or redirect) in the response."
+        );
+      }
+
+      localStorage.setItem(
+        "finalizedOutgoingPaymentGrantAccessTokenValue",
+        finalizedOutgoingPaymentGrantAccessTokenValue
+      );
+      localStorage.setItem(
+        "finalizedOutgoingPaymentGrantContinueUri",
+        finalizedOutgoingPaymentGrantContinueUri
+      );
+      localStorage.setItem("quoteId", quoteId);
+
       // Assuming the response contains a redirect URL field
-      const redirectUrl = data.redirectUrl;
+      const redirectUrl = data.redirect;
       if (!redirectUrl) {
         throw new Error("Error: No redirect URL found in the response");
       }
-      */
-
-      // Hardcoded redirect URL for testing
-      const redirectUrl = "https://ilp.interledger-test.dev/khaya-stokvel";
 
       // Redirect the user to the payment URL
       window.location.href = redirectUrl;
     } catch (error) {
       console.error("Failed to initiate payment:", error);
+      // Handle error (e.g., show an error message to the user)
+    }
+  };
+
+  const handleConfirmPayment = async (e) => {
+    e.preventDefault();
+    try {
+      // Retrieve the stored walletId and quoteId from localStorage
+      const finalizedOutgoingPaymentGrantAccessTokenValue =
+        localStorage.getItem("finalizedOutgoingPaymentGrantAccessTokenValue");
+      const quoteId = localStorage.getItem("quoteId");
+
+      const finalizedOutgoingPaymentGrantContinueUri = localStorage.getItem(
+        "finalizedOutgoingPaymentGrantContinueUri"
+      );
+
+      if (
+        !finalizedOutgoingPaymentGrantContinueUri ||
+        !quoteId ||
+        !finalizedOutgoingPaymentGrantAccessTokenValue
+      ) {
+        throw new Error("Error: Missing vars localStorage.");
+      }
+
+      const apiUrl = "http://localhost:3000/api/complete-payment";
+      const postData = {
+        continueAccessToken: finalizedOutgoingPaymentGrantAccessTokenValue,
+        outgoingPaymentGrantContinueUri:finalizedOutgoingPaymentGrantContinueUri,
+        quoteID: quoteId,
+      };
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+
+      // Check if the response is ok (status code 2xx)
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Payment completed successfully:", data);
+
+      alert("Payment completed successfully!");
+
+      // Optionally clear the stored variables after payment confirmation
+      localStorage.removeItem("walletId");
+      localStorage.removeItem("quoteId");
+    } catch (error) {
+      console.error("Failed to complete payment:", error);
       // Handle error (e.g., show an error message to the user)
     }
   };
@@ -243,9 +319,17 @@ const StokvelViewPage = () => {
                         <CButton
                           color="success"
                           size="sm"
-                          onClick={handleInitiatePayment}
+                          onClick={(e) => handleInitiatePayment(e)}
                         >
-                          Pay Now
+                          Initiate Payment
+                        </CButton>
+                        {' '}
+                        <CButton
+                          color="secondary"
+                          size="sm"
+                          onClick={(e) => handleConfirmPayment(e)}
+                        >
+                          Confirm Payment
                         </CButton>
                       </CTableDataCell>
                     </CTableRow>

@@ -1,13 +1,13 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'node:path'
-import autoprefixer from 'autoprefixer'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "node:path";
+import autoprefixer from "autoprefixer";
 
 export default defineConfig(() => {
   return {
-    base: './',
+    base: "./",
     build: {
-      outDir: 'build',
+      outDir: "build",
     },
     css: {
       postcss: {
@@ -22,7 +22,7 @@ export default defineConfig(() => {
       },
     },
     esbuild: {
-      loader: 'jsx',
+      loader: "jsx",
       include: /src\/.*\.jsx?$/,
       exclude: [],
     },
@@ -30,7 +30,7 @@ export default defineConfig(() => {
       force: true,
       esbuildOptions: {
         loader: {
-          '.js': 'jsx',
+          ".js": "jsx",
         },
       },
     },
@@ -38,17 +38,17 @@ export default defineConfig(() => {
     resolve: {
       alias: [
         {
-          find: 'src/',
-          replacement: `${path.resolve(__dirname, 'src')}/`,
+          find: "src/",
+          replacement: `${path.resolve(__dirname, "src")}/`,
         },
       ],
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss'],
+      extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json", ".scss"],
     },
     server: {
-      port: 3000,
+      port: 8080,
       proxy: {
         // https://vitejs.dev/config/server-options.html
       },
     },
-  }
-})
+  };
+});

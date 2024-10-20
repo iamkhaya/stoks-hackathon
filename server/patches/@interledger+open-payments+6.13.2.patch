@@ -1,0 +1,15 @@
+diff --git a/node_modules/@interledger/open-payments/dist/test/helpers.d.ts b/node_modules/@interledger/open-payments/dist/test/helpers.d.ts
+index 6bcc1a5..e94f7f9 100644
+--- a/node_modules/@interledger/open-payments/dist/test/helpers.d.ts
++++ b/node_modules/@interledger/open-payments/dist/test/helpers.d.ts
+@@ -2,9 +2,7 @@ import { createHttpClient } from '../client/requests';
+ import { IncomingPayment, GrantRequest, GrantContinuationRequest, OutgoingPayment, OutgoingPaymentPaginationResult, WalletAddress, JWK, AccessToken, Quote, IncomingPaymentPaginationResult, PendingGrant, Grant, IncomingPaymentWithPaymentMethods, IlpPaymentMethod, PublicIncomingPayment, DIDDocument, OutgoingPaymentWithSpentAmounts } from '../types';
+ import { ResponseValidator } from '@interledger/openapi';
+ import { BaseDeps } from '../client';
+-export declare const silentLogger: import("pino").Logger<{
+-    level: string;
+-}>;
++export declare const silentLogger: import("pino").Logger<string>;
+ export declare const keyId = "default-key-id";
+ export declare const getDefaultHttpClient: () => ReturnType<typeof createHttpClient>;
+ export declare const mockOpenApiResponseValidators: () => {
