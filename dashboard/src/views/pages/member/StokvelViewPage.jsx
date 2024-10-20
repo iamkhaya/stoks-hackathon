@@ -229,7 +229,7 @@ const StokvelViewPage = () => {
       {currentUser.role === "Admin" && (
         <div className="d-flex justify-content-between align-items-center my-4">
           <h4>Members</h4>
-          <CButton color="primary">Invite Member</CButton>
+          <CButton color="dark">Invite Member</CButton>
         </div>
       )}
       {/* Members Section */}
@@ -239,7 +239,7 @@ const StokvelViewPage = () => {
             <CCard>
               <CCardHeader>
                 <h5>{member.name}</h5>
-                <CBadge color={member.role === "Admin" ? "info" : "secondary"}>
+               <CBadge color={member.role === "Admin" ? "dark" : "secondary"}>
                   {member.role}
                 </CBadge>
               </CCardHeader>
@@ -319,7 +319,7 @@ const StokvelViewPage = () => {
                       </CTableDataCell>
                       <CTableDataCell>
                         <CButton
-                          color="success"
+                          color="dark"
                           size="sm"
                           onClick={(e) => handleInitiatePayment(e)}
                         >
@@ -370,7 +370,7 @@ const StokvelViewPage = () => {
       </CRow>
 
       <Link to="/member-dashboard">
-        <CButton color="primary" className="mt-4">
+        <CButton style={{ backgroundColor: 'black', color: 'white' }} className="mt-4 mb-4">
           Back to Stokvels
         </CButton>
       </Link>

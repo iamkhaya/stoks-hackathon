@@ -53,7 +53,7 @@ const MemberDashboardPage = ({ stoks }) => {
                 <CCardText>
                   <strong>Role: </strong>
                   {stokvel.isAdmin ? (
-                    <span className="badge text-bg-info">Administrator</span>
+                    <span className="badge text-bg-dark">Admin</span>
                   ) : (
                     <span className="badge text-bg-secondary">Member</span>
                   )}
@@ -68,9 +68,7 @@ const MemberDashboardPage = ({ stoks }) => {
               </CCardBody>
               <CCardFooter>
                 <Link to={`/stokvel/${stokvel.id}`}>
-                  <CButton color="primary" size="sm" className="me-2">
-                    View
-                  </CButton>
+                 <CButton color="dark" size="sm" className="me-2"> View </CButton>
                 </Link>
                 <CButton color="danger" size="sm">
                   Leave Stokvel
