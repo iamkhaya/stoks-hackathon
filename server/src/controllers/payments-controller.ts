@@ -4,6 +4,11 @@ import {
   OpenPaymentsClientError,
   isFinalizedGrant,
   WalletAddress,
+  IncomingPayment,
+  GrantRequest,
+  OutgoingPayment,
+  Grant,
+  GrantContinuation
 } from "@interledger/open-payments";
 import readline from "readline/promises";
 import { createClient, id, AccountFlags, TransferFlags } from "tigerbeetle-node";
@@ -139,9 +144,9 @@ private async getWalletAddress(url: string): Promise<WalletAddress> {
  * Retrieve the finalized outgoing payment grant.
  * @param {string} grantUri - The URI for continuing the outgoing payment grant.
  * @param {string} accessToken - The access token to continue the grant.
- * @returns {Promise<Grant>} - The finalized outgoing payment grant.
+ * @returns {Promise<GrantContinuation>} - The finalized outgoing payment grant.
  */
-private async getFinalizedOutgoingPaymentGrant(grantUri: string, accessToken: string): Promise<any> {
+private async getFinalizedOutgoingPaymentGrant(grantUri: string, accessToken: string): Promise<GrantContinuation> {
   try {
     return await this.client.grant.continue({
       url: grantUri,
@@ -159,7 +164,7 @@ private async getFinalizedOutgoingPaymentGrant(grantUri: string, accessToken: st
  * @param {string} quoteID - The ID of the payment quote.
  * @returns {Promise<OutgoingPayment>} - The created outgoing payment object.
  */
-private async createOutgoingPayment(walletAddress: WalletAddress, finalizedGrant: any, quoteID: string): Promise<any> {
+private async createOutgoingPayment(walletAddress: WalletAddress, finalizedGrant: any, quoteID: string): Promise<OutgoingPayment> {
   try {
     return await this.client.outgoingPayment.create(
       {
